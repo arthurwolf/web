@@ -17,10 +17,16 @@ class Handler {
         # RAKUDO : submethod BUILD doesn't work ( forgets its args ), we should eval the regex only on BUILD and then store it
         my $condition_regex = (eval " $condition ");
         my $match = $clean_path.match($condition_regex);
-        my @splat = @($match).map({ ~$_ });
-        %result{'splat'} = @splat;
-        %result{'success'} = ?($match);
+        %result<splat> = @($match).map({ ~$_ });
+        %result<success> = ?($match);
         return %result;
+    }
+
+    method explode( Str $target ){
+        my @path = $target.split('/');
+        @path.shift() if @path[0] eq '';
+        return @path
+
     }
 
 };
@@ -38,9 +44,8 @@ class Dispatch {
         for @.handlers -> $candidate {
             my %match = $candidate.matches( $request.path_info );
             if %match{'success'} and $candidate.http_method eq $request.request_method {
-                %match{'splat'}.perl.say;
                 my $code = $candidate.code;
-                $response.write( $code(|%match) );
+                $response.write( $code(|%match<splat>) );
                 return $response;
             }
         }
@@ -87,9 +92,3 @@ module Astaire {
         return $application;
     }
 };
-
-
-
-      
-
-
