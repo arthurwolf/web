@@ -19,19 +19,8 @@ class Handler {
         my $match = $clean_path.match($condition_regex);
         my @splat = @($match).map({ ~$_ });
         %result{'splat'} = @splat;
-        if $match {
-            %result{'success'} = 1;
-            return %result;   
-        }else{
-            %result{'success'} = 0;
-            return %result;   
-        }
-    }
-
-    method explode( Str $target ){
-        my @path = $target.split('/');
-        @path.shift() if @path[0] eq '';
-        return @path
+        %result{'success'} = ?($match);
+        return %result;
     }
 
 };
